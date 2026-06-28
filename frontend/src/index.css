@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@import 'tailwindcss';
+@config "../tailwind.config.js";
+
+@layer base {
+  body {
+    @apply bg-background text-onSurface font-sans antialiased;
+  }
+}
+
+@layer components {
+  /* Common UI Elements */
+  .btn-primary {
+    @apply bg-primary text-primary-on px-4 py-2 rounded-button font-medium transition-colors hover:bg-primary-container hover:text-primary-onContainer;
+  }
+  
+  .card {
+    @apply bg-surface-container-lowest border border-surface-container-highest rounded-card shadow-card p-6;
+  }
+  
+  .input-field {
+    @apply bg-surface-container-lowest border border-surface-container-highest rounded-button px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all;
+  }
+}
