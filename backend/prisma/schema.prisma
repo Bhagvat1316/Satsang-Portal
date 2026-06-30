@@ -58,31 +58,31 @@ model User {
 }
 
 model Attendance {
-  id         String           @id @default(uuid())
-  userId     String
-  sabhaDate  DateTime         @db.Date
-  sabhaName  String
-  startTime  DateTime         @db.Time
-  endTime    DateTime         @db.Time
-  status     AttendanceStatus
-  createdAt  DateTime         @default(now())
+  id        String           @id @default(uuid())
+  userId    String
+  sabhaDate DateTime         @db.Date
+  sabhaName String
+  startTime DateTime         @db.Time
+  endTime   DateTime         @db.Time
+  status    AttendanceStatus
+  createdAt DateTime         @default(now())
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, sabhaDate, sabhaName]) // Optional: Prevent double attendance for same sabha
   @@index([userId])
   @@index([sabhaDate])
-  @@unique([userId, sabhaDate, sabhaName]) // Optional: Prevent double attendance for same sabha
 }
 
 model JournalEntry {
-  id         String   @id @default(uuid())
-  userId     String
-  sabhaDate  DateTime @db.Date
-  title      String
-  learning   String   @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  sabhaDate DateTime @db.Date
+  title     String
+  learning  String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -143,4 +143,22 @@ model Gallery {
   uploadedAt  DateTime @default(now())
 
   @@index([eventName])
+}
+
+model HeroBanner {
+  id            String    @id @default(uuid())
+  title         String
+  subtitle      String
+  imageUrl      String
+  imagePublicId String
+  buttonText    String?
+  buttonLink    String?
+  startDate     DateTime?
+  endDate       DateTime?
+  displayOrder  Int       @unique
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([displayOrder])
 }

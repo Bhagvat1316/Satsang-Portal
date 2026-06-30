@@ -23,6 +23,7 @@ import AdminEvents from '../pages/admin/AdminEvents';
 import AdminEventRegistrations from '../pages/admin/AdminEventRegistrations';
 import AdminJournals from '../pages/admin/AdminJournals';
 import AdminGallery from '../pages/admin/AdminGallery';
+import AdminHeroBanners from '../pages/admin/AdminHeroBanners';
 import AdminReports from '../pages/admin/AdminReports';
 import AdminSettings from '../pages/admin/AdminSettings';
 
@@ -61,6 +62,7 @@ const AppRoutes = () => {
             <Route path="event-registrations" element={<AdminEventRegistrations />} />
             <Route path="journals" element={<AdminJournals />} />
             <Route path="gallery" element={<AdminGallery />} />
+            <Route path="hero-banners" element={<AdminHeroBanners />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route index element={<Navigate to="dashboard" replace />} />

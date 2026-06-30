@@ -2,25 +2,37 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { noticeService } from '../../services/noticeService';
 import { eventService } from '../../services/eventService';
+import { bannerService } from '../../services/bannerService';
 import Button from '../../components/common/Button';
 import NoticeCard from '../../components/specific/NoticeCard';
 import EventCard from '../../components/specific/EventCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { ImageIcon } from 'lucide-react';
+// Swiper imports
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation, Pagination, Keyboard, EffectFade } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 
 const Home = () => {
   const [notices, setNotices] = useState([]);
   const [events, setEvents] = useState([]);
+  const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [nData, eData] = await Promise.all([
+        const [nData, eData, bData] = await Promise.all([
           noticeService.getAllNotices(),
-          eventService.getAllEvents()
+          eventService.getAllEvents(),
+          bannerService.getPublicBanners()
         ]);
         setNotices(nData.slice(0, 3)); // preview top 3
         setEvents(eData.slice(0, 3)); // preview top 3
+        setBanners(bData || []);
       } catch (err) {
         console.error("Error fetching homepage data");
       } finally {
@@ -102,6 +114,60 @@ const Home = () => {
           </section>
         </div>
       )}
+
+      {/* Hero Banner Slider */}
+      {loading ? (
+        <section className="w-full h-64 md:h-[500px] bg-surface-container-highest animate-pulse rounded-2xl flex items-center justify-center">
+          <ImageIcon className="text-onSurface-variant opacity-20" size={64} />
+        </section>
+      ) : banners.length > 0 ? (
+        <section className="w-full overflow-hidden rounded-2xl shadow-lg border border-surface-container">
+          <Swiper
+            modules={[Autoplay, Navigation, Pagination, Keyboard, EffectFade]}
+            effect="fade"
+            fadeEffect={{ crossFade: true }}
+            spaceBetween={0}
+            slidesPerView={1}
+            navigation
+            pagination={{ clickable: true }}
+            keyboard={{ enabled: true }}
+            autoplay={{ delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }}
+            loop={banners.length > 1}
+            className="w-full h-64 md:h-[500px] bg-black group"
+          >
+            {banners.map(banner => (
+              <SwiperSlide key={banner.id} className="relative w-full h-full">
+                {/* Lazy loaded image */}
+                <img
+                  src={banner.imageUrl}
+                  alt={banner.title}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+
+                {/* Dark Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-8 md:p-16 text-left">
+                  <div className="max-w-4xl transform transition-transform duration-700 translate-y-0 opacity-100">
+                    <h2 className="text-white text-3xl md:text-5xl font-bold mb-4 leading-tight drop-shadow-md">
+                      {banner.title}
+                    </h2>
+                    <p className="text-white/90 text-lg md:text-xl max-w-2xl mb-8 drop-shadow">
+                      {banner.subtitle}
+                    </p>
+                    {banner.buttonText && banner.buttonLink && (
+                      <Link to={banner.buttonLink}>
+                        <Button className="bg-primary text-primary-on hover:bg-primary/90 shadow-lg px-8 py-3 rounded-full text-md font-semibold transition-transform hover:scale-105 active:scale-95">
+                          {banner.buttonText}
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </section>
+      ) : null}
 
       {/* CTA Section */}
       <section className="bg-primary-container rounded-card p-10 text-center">

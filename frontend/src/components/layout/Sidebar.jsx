@@ -25,6 +25,7 @@ const Sidebar = ({ role = 'USER', onLogout, onNavClick, className = '' }) => {
     { name: 'Event Registrations', path: '/admin/event-registrations', icon: Users },
     { name: 'Journals', path: '/admin/journals', icon: BookOpen },
     { name: 'Gallery', path: '/admin/gallery', icon: ImageIcon },
+    { name: 'Hero Banners', path: '/admin/hero-banners', icon: ImageIcon },
     { name: 'Reports', path: '/admin/reports', icon: BookOpen },
     { name: 'Settings', path: '/admin/settings', icon: Settings },
   ];

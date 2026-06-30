@@ -24,6 +24,7 @@ const noticeRoutes = require('./routes/noticeRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const journalRoutes = require('./routes/journalRoutes');
+const bannerRoutes = require('./routes/bannerRoutes');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
@@ -33,6 +34,7 @@ app.use('/api/notices', noticeRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/journals', journalRoutes);
+app.use('/api/banners', bannerRoutes);
 
 // Cloudinary Test Route
 const { verifyCloudinaryConnection } = require('./config/cloudinary');
