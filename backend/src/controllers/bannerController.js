@@ -20,15 +20,8 @@ const getAllBannersAdmin = async (req, res) => {
 
 const createBanner = async (req, res) => {
   try {
-    const { title, subtitle, buttonText, buttonLink, startDate, endDate, isActive } = req.body;
+    const { title, subtitle, buttonText, buttonLink, startDate, endDate, isActive, mediaType, youtubeUrl } = req.body;
     const filePath = req.file ? req.file.path : null;
-
-    if (!filePath) {
-      return res.status(400).json({ success: false, message: 'Image file is required' });
-    }
-    if (!title || !subtitle) {
-      return res.status(400).json({ success: false, message: 'Title and subtitle are required' });
-    }
 
     const bannerData = {
       title,
@@ -37,6 +30,8 @@ const createBanner = async (req, res) => {
       buttonLink,
       startDate,
       endDate,
+      mediaType,
+      youtubeUrl,
       isActive: isActive !== undefined ? isActive === 'true' || isActive === true : true
     };
 
@@ -51,7 +46,7 @@ const createBanner = async (req, res) => {
 const updateBanner = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, subtitle, buttonText, buttonLink, startDate, endDate, isActive } = req.body;
+    const { title, subtitle, buttonText, buttonLink, startDate, endDate, isActive, mediaType, youtubeUrl } = req.body;
     const filePath = req.file ? req.file.path : null;
 
     const bannerData = {};
@@ -59,6 +54,8 @@ const updateBanner = async (req, res) => {
     if (subtitle !== undefined) bannerData.subtitle = subtitle;
     if (buttonText !== undefined) bannerData.buttonText = buttonText;
     if (buttonLink !== undefined) bannerData.buttonLink = buttonLink;
+    if (mediaType !== undefined) bannerData.mediaType = mediaType;
+    if (youtubeUrl !== undefined) bannerData.youtubeUrl = youtubeUrl;
     if (startDate !== undefined) bannerData.startDate = startDate === 'null' ? null : startDate;
     if (endDate !== undefined) bannerData.endDate = endDate === 'null' ? null : endDate;
     if (isActive !== undefined) bannerData.isActive = isActive === 'true' || isActive === true;

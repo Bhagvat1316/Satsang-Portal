@@ -16,6 +16,11 @@ enum Role {
   USER
 }
 
+enum MediaType {
+  IMAGE
+  YOUTUBE
+}
+
 enum Status {
   ACTIVE
   INACTIVE
@@ -147,10 +152,10 @@ model Gallery {
 
 model HeroBanner {
   id            String    @id @default(uuid())
-  title         String
-  subtitle      String
-  imageUrl      String
-  imagePublicId String
+  title         String?
+  subtitle      String?
+  imageUrl      String?
+  imagePublicId String?
   buttonText    String?
   buttonLink    String?
   startDate     DateTime?
@@ -159,6 +164,11 @@ model HeroBanner {
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  mediaType      MediaType @default(IMAGE)
+  youtubeUrl     String?
+  youtubeVideoId String?
+  thumbnailUrl   String?
 
   @@index([displayOrder])
 }

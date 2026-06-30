@@ -43,7 +43,7 @@ const SortableBannerRow = ({ banner, onEdit, onDelete }) => {
             {banner.isActive ? 'Active' : 'Inactive'}
           </Badge>
           {(banner.startDate || banner.endDate) && (
-             <Badge variant="warning" size="sm">Scheduled</Badge>
+            <Badge variant="warning" size="sm">Scheduled</Badge>
           )}
         </div>
       </div>
@@ -75,6 +75,8 @@ const AdminHeroBanners = () => {
     startDate: '',
     endDate: '',
     isActive: true,
+    mediaType: 'IMAGE',
+    youtubeUrl: '',
     imageFile: null,
     imagePreview: null
   });
@@ -105,7 +107,7 @@ const AdminHeroBanners = () => {
     if (active.id !== over.id) {
       const oldIndex = banners.findIndex((b) => b.id === active.id);
       const newIndex = banners.findIndex((b) => b.id === over.id);
-      
+
       const newOrdered = arrayMove(banners, oldIndex, newIndex);
       setBanners(newOrdered);
 
@@ -137,8 +139,10 @@ const AdminHeroBanners = () => {
       startDate: banner.startDate ? new Date(banner.startDate).toISOString().slice(0, 16) : '',
       endDate: banner.endDate ? new Date(banner.endDate).toISOString().slice(0, 16) : '',
       isActive: banner.isActive,
+      mediaType: banner.mediaType || 'IMAGE',
+      youtubeUrl: banner.youtubeUrl || '',
       imageFile: null,
-      imagePreview: banner.imageUrl
+      imagePreview: banner.mediaType === 'YOUTUBE' ? banner.thumbnailUrl : banner.imageUrl
     });
     setIsModalOpen(true);
   };
@@ -184,25 +188,31 @@ const AdminHeroBanners = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.title.trim() || !formData.subtitle.trim()) {
-      addToast('Title and Subtitle are required.', 'error');
+    if (!editingBanner && formData.mediaType === 'IMAGE' && !formData.imageFile) {
+      addToast('A banner image is required for new image banners.', 'error');
       return;
     }
-    if (!editingBanner && !formData.imageFile) {
-      addToast('A banner image is required for new banners.', 'error');
+    if (formData.mediaType === 'YOUTUBE' && !formData.youtubeUrl.trim()) {
+      addToast('A YouTube URL is required.', 'error');
       return;
     }
 
     setIsSubmitting(true);
     const data = new FormData();
-    data.append('title', formData.title);
-    data.append('subtitle', formData.subtitle);
+    if (formData.title) data.append('title', formData.title);
+    if (formData.subtitle) data.append('subtitle', formData.subtitle);
     if (formData.buttonText) data.append('buttonText', formData.buttonText);
     if (formData.buttonLink) data.append('buttonLink', formData.buttonLink);
     if (formData.startDate) data.append('startDate', new Date(formData.startDate).toISOString());
     if (formData.endDate) data.append('endDate', new Date(formData.endDate).toISOString());
     data.append('isActive', formData.isActive);
-    if (formData.imageFile) data.append('image', formData.imageFile);
+    data.append('mediaType', formData.mediaType);
+    if (formData.mediaType === 'YOUTUBE' && formData.youtubeUrl) {
+      data.append('youtubeUrl', formData.youtubeUrl);
+    }
+    if (formData.mediaType === 'IMAGE' && formData.imageFile) {
+      data.append('image', formData.imageFile);
+    }
 
     try {
       if (editingBanner) {
@@ -222,14 +232,34 @@ const AdminHeroBanners = () => {
     }
   };
 
+  const extractYouTubeId = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  useEffect(() => {
+    if (formData.mediaType === 'YOUTUBE' && formData.youtubeUrl) {
+      const videoId = extractYouTubeId(formData.youtubeUrl);
+      if (videoId) {
+        setFormData(prev => ({ ...prev, imagePreview: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` }));
+      } else {
+        setFormData(prev => ({ ...prev, imagePreview: null }));
+      }
+    } else if (formData.mediaType === 'IMAGE' && !formData.imageFile && !editingBanner) {
+      setFormData(prev => ({ ...prev, imagePreview: null }));
+    }
+  }, [formData.youtubeUrl, formData.mediaType]);
+
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader 
-        title="Hero Banner Management" 
+      <PageHeader
+        title="Hero Banner Management"
         subtitle="Manage the animated homepage hero slider. Drag and drop to reorder."
         action={
-          <Button 
-            onClick={openCreateModal} 
+          <Button
+            onClick={openCreateModal}
             disabled={banners.length >= 10 || loading}
             title={banners.length >= 10 ? "Maximum of 10 banners allowed" : ""}
           >
@@ -284,11 +314,18 @@ const AdminHeroBanners = () => {
               {formData.imagePreview ? (
                 <>
                   <img src={formData.imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex flex-col justify-center px-8 md:px-12 text-left">
-                    <h2 className="text-white text-2xl md:text-3xl font-bold mb-2 max-w-lg">{formData.title || "Banner Title"}</h2>
-                    <p className="text-white/90 text-sm md:text-base max-w-md mb-6">{formData.subtitle || "Banner subtitle text appears here."}</p>
+                  {formData.mediaType === 'YOUTUBE' && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                      <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md shadow-lg flex items-center justify-center text-white border border-white/30">
+                        <svg className="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end px-8 md:px-12 pb-8 md:pb-12 text-left z-20">
+                    {formData.title && <h2 className="text-white text-2xl md:text-3xl font-bold mb-2 max-w-lg">{formData.title}</h2>}
+                    {formData.subtitle && <p className="text-white/90 text-sm md:text-base max-w-md mb-6">{formData.subtitle}</p>}
                     {formData.buttonText && formData.buttonLink && (
-                      <div className="mt-2 inline-flex items-center justify-center px-6 py-2 bg-primary text-primary-on rounded-full font-medium shadow-md">
+                      <div className="mt-2 inline-flex items-center justify-center px-6 py-2 bg-primary text-primary-on rounded-full font-medium shadow-md w-max">
                         {formData.buttonText}
                       </div>
                     )}
@@ -302,35 +339,56 @@ const AdminHeroBanners = () => {
             </div>
           </div>
 
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-label-md font-semibold text-onSurface mb-2">Banner Image (Required) <span className="font-normal text-onSurface-variant ml-2 text-xs">1920x700 JPG/PNG/WEBP (Max 5MB)</span></label>
-              <div className="flex items-center gap-4">
-                <Button variant="secondary" outline onClick={() => fileInputRef.current?.click()} disabled={isSubmitting}>
-                  Choose File
-                </Button>
-                <span className="text-sm text-onSurface-variant">{formData.imageFile ? formData.imageFile.name : (formData.imagePreview ? 'Current Image Maintained' : 'No file chosen')}</span>
-                <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/jpeg, image/png, image/webp" className="hidden" />
+              <label className="block text-label-md font-semibold text-onSurface mb-2">Media Type</label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="mediaType" value="IMAGE" checked={formData.mediaType === 'IMAGE'} onChange={(e) => setFormData({ ...formData, mediaType: e.target.value })} disabled={isSubmitting} className="w-4 h-4 text-primary" />
+                  <span className="text-body-md">Image</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="mediaType" value="YOUTUBE" checked={formData.mediaType === 'YOUTUBE'} onChange={(e) => setFormData({ ...formData, mediaType: e.target.value })} disabled={isSubmitting} className="w-4 h-4 text-primary" />
+                  <span className="text-body-md">YouTube Video</span>
+                </label>
               </div>
             </div>
 
+            {formData.mediaType === 'IMAGE' ? (
+              <div className="col-span-1 md:col-span-2">
+                <label className="block text-label-md font-semibold text-onSurface mb-2">Banner Image (Required) <span className="font-normal text-onSurface-variant ml-2 text-xs">1920x700 JPG/PNG/WEBP (Max 5MB)</span></label>
+                <div className="flex items-center gap-4">
+                  <Button variant="secondary" outline onClick={() => fileInputRef.current?.click()} disabled={isSubmitting}>
+                    Choose File
+                  </Button>
+                  <span className="text-sm text-onSurface-variant">{formData.imageFile ? formData.imageFile.name : (formData.imagePreview && editingBanner?.mediaType === 'IMAGE' ? 'Current Image Maintained' : 'No file chosen')}</span>
+                  <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/jpeg, image/png, image/webp" className="hidden" />
+                </div>
+              </div>
+            ) : (
+              <div className="col-span-1 md:col-span-2">
+                <Input label="YouTube Video URL (Required)" value={formData.youtubeUrl} onChange={e => setFormData({ ...formData, youtubeUrl: e.target.value })} disabled={isSubmitting} placeholder="https://www.youtube.com/watch?v=..." />
+              </div>
+            )}
+
             <div className="col-span-1 md:col-span-2">
-              <Input label="Title (Required)" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} disabled={isSubmitting} placeholder="e.g. Guru Purnima Mahotsav 2026" />
+              <Input label="Title (Optional)" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} disabled={isSubmitting} placeholder="e.g. Guru Purnima Mahotsav 2026" />
             </div>
 
             <div className="col-span-1 md:col-span-2">
-              <TextArea label="Subtitle (Required)" value={formData.subtitle} onChange={e => setFormData({...formData, subtitle: e.target.value})} disabled={isSubmitting} rows={2} placeholder="Join us for divine celebrations and seva." />
+              <TextArea label="Subtitle (Optional)" value={formData.subtitle} onChange={e => setFormData({ ...formData, subtitle: e.target.value })} disabled={isSubmitting} rows={2} placeholder="Join us for divine celebrations and seva." />
             </div>
 
-            <Input label="Button Text (Optional)" value={formData.buttonText} onChange={e => setFormData({...formData, buttonText: e.target.value})} disabled={isSubmitting} placeholder="e.g. Register Now" />
-            <Input label="Button Link (Optional)" value={formData.buttonLink} onChange={e => setFormData({...formData, buttonLink: e.target.value})} disabled={isSubmitting} placeholder="e.g. /events" />
+            <Input label="Button Text (Optional)" value={formData.buttonText} onChange={e => setFormData({ ...formData, buttonText: e.target.value })} disabled={isSubmitting} placeholder="e.g. Register Now" />
+            <Input label="Button Link (Optional)" value={formData.buttonLink} onChange={e => setFormData({ ...formData, buttonLink: e.target.value })} disabled={isSubmitting} placeholder="e.g. /events" />
 
-            <Input type="datetime-local" label="Start Date (Optional)" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} disabled={isSubmitting} />
-            <Input type="datetime-local" label="End Date (Optional)" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} disabled={isSubmitting} />
-            
+            <Input type="datetime-local" label="Start Date (Optional)" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} disabled={isSubmitting} />
+            <Input type="datetime-local" label="End Date (Optional)" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} disabled={isSubmitting} />
+
             <div className="col-span-1 md:col-span-2 flex items-center gap-3 mt-2">
               <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" checked={formData.isActive} onChange={(e) => setFormData({...formData, isActive: e.target.checked})} disabled={isSubmitting} />
+                <input type="checkbox" className="sr-only peer" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} disabled={isSubmitting} />
                 <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                 <span className="ml-3 text-label-md font-medium text-onSurface">Active (Visible to public if within dates)</span>
               </label>
@@ -352,7 +410,7 @@ const AdminHeroBanners = () => {
         }
       >
         <p className="text-body-md text-onSurface-variant mb-4">
-          Are you sure you want to delete the banner <strong>"{bannerToDelete?.title}"</strong>? 
+          Are you sure you want to delete the banner <strong>"{bannerToDelete?.title}"</strong>?
           This will permanently remove the image from storage. This action cannot be undone.
         </p>
       </Modal>

@@ -46,7 +46,9 @@ const uploadMiddleware = (req, res, next) => {
     
     // File validation requirement: ensure a file was actually uploaded for POST
     if (req.method === 'POST' && !req.file) {
-      return res.status(400).json({ success: false, message: 'Image file is required' });
+      if (req.body.mediaType !== 'YOUTUBE') {
+        return res.status(400).json({ success: false, message: 'Image file is required' });
+      }
     }
     
     next();

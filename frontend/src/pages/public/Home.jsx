@@ -135,36 +135,70 @@ const Home = () => {
             loop={banners.length > 1}
             className="w-full h-64 md:h-[500px] bg-black group"
           >
-            {banners.map(banner => (
-              <SwiperSlide key={banner.id} className="relative w-full h-full">
-                {/* Lazy loaded image */}
-                <img
-                  src={banner.imageUrl}
-                  alt={banner.title}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+            {banners.map(banner => {
+              const SlideContent = (
+                <div className="relative w-full h-full group/slide cursor-pointer">
+                  {/* Lazy loaded image / thumbnail */}
+                  <img
+                    src={banner.mediaType === 'YOUTUBE' ? banner.thumbnailUrl : banner.imageUrl}
+                    alt={banner.title}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  
+                  {/* YouTube Premium Play Button */}
+                  {banner.mediaType === 'YOUTUBE' && (
+                    <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-black/40 backdrop-blur-md shadow-2xl flex items-center justify-center text-white border border-white/20 transition-transform duration-300 transform group-hover/slide:scale-110">
+                        <div className="absolute inset-0 rounded-full animate-ping opacity-20 bg-white"></div>
+                        <svg className="w-10 h-10 md:w-12 md:h-12 ml-2 relative z-10" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    </div>
+                  )}
 
-                {/* Dark Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-8 md:p-16 text-left">
-                  <div className="max-w-4xl transform transition-transform duration-700 translate-y-0 opacity-100">
-                    <h2 className="text-white text-3xl md:text-5xl font-bold mb-4 leading-tight drop-shadow-md">
-                      {banner.title}
-                    </h2>
-                    <p className="text-white/90 text-lg md:text-xl max-w-2xl mb-8 drop-shadow">
-                      {banner.subtitle}
-                    </p>
-                    {banner.buttonText && banner.buttonLink && (
-                      <Link to={banner.buttonLink}>
-                        <Button className="bg-primary text-primary-on hover:bg-primary/90 shadow-lg px-8 py-3 rounded-full text-md font-semibold transition-transform hover:scale-105 active:scale-95">
-                          {banner.buttonText}
-                        </Button>
-                      </Link>
-                    )}
+                  {/* Dark Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-8 md:p-16 text-left z-20">
+                    <div className="max-w-4xl transform transition-transform duration-700 translate-y-0 opacity-100 pointer-events-auto">
+                      {banner.title && (
+                        <h2 className="text-white text-3xl md:text-5xl font-bold mb-4 leading-tight drop-shadow-md">
+                          {banner.title}
+                        </h2>
+                      )}
+                      {banner.subtitle && (
+                        <p className="text-white/90 text-lg md:text-xl max-w-2xl mb-8 drop-shadow">
+                          {banner.subtitle}
+                        </p>
+                      )}
+                      {banner.buttonText && banner.buttonLink && (
+                        banner.mediaType === 'YOUTUBE' ? (
+                          <div className="inline-flex cursor-pointer bg-primary text-primary-on hover:bg-primary/90 shadow-lg px-8 py-3 rounded-full text-md font-semibold transition-transform hover:scale-105 active:scale-95">
+                            {banner.buttonText}
+                          </div>
+                        ) : (
+                          <Link to={banner.buttonLink}>
+                            <Button className="bg-primary text-primary-on hover:bg-primary/90 shadow-lg px-8 py-3 rounded-full text-md font-semibold transition-transform hover:scale-105 active:scale-95">
+                              {banner.buttonText}
+                            </Button>
+                          </Link>
+                        )
+                      )}
+                    </div>
                   </div>
                 </div>
-              </SwiperSlide>
-            ))}
+              );
+
+              return (
+                <SwiperSlide key={banner.id} className="relative w-full h-full">
+                  {banner.mediaType === 'YOUTUBE' ? (
+                    <a href={banner.youtubeUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                      {SlideContent}
+                    </a>
+                  ) : (
+                    SlideContent
+                  )}
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
         </section>
       ) : null}
