@@ -35,10 +35,10 @@ const Home = () => {
       {/* Hero Section */}
       <section className="bg-surface-container-low rounded-[24px] p-8 md:p-16 text-center border border-surface-container-highest flex flex-col items-center">
         <h1 className="text-display-lg text-onSurface mb-6 max-w-3xl leading-tight">
-          Welcome to the <br/> Satsang Community Portal
+          Welcome to the <br /> Satsang Community Portal
         </h1>
         <p className="text-body-lg text-onSurface-variant mb-8 max-w-2xl">
-          A dedicated platform for managing your spiritual journey, tracking sabha attendance, 
+          A dedicated platform for managing your spiritual journey, tracking sabha attendance,
           learning journals, and staying connected with our vibrant community.
         </p>
         <div className="flex gap-4">
@@ -54,8 +54,8 @@ const Home = () => {
       {/* Community Statistics */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {[
-          { label: 'Active Members', value: '1,200+' },
-          { label: 'Weekly Sabhas', value: '15' },
+          { label: 'Active Members', value: '30+' },
+          { label: 'Yearly Sabhas', value: '52' },
           { label: 'Community Events', value: '45/yr' },
           { label: 'Years of Seva', value: '25+' },
         ].map((stat, i) => (
@@ -91,11 +91,11 @@ const Home = () => {
             </div>
             <div className="flex flex-col gap-4">
               {events.map(event => (
-                <EventCard 
-                  key={event.id} 
-                  {...event} 
-                  isRegistered={false} 
-                  onRegister={() => window.location.href='/login'} 
+                <EventCard
+                  key={event.id}
+                  {...event}
+                  isRegistered={false}
+                  onRegister={() => window.location.href = '/login'}
                 />
               ))}
             </div>
