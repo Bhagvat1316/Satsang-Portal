@@ -172,6 +172,14 @@ postman/
 - Mobile Responsive Improvements
 - Performance Optimization
 
+## Live Demo
+
+Frontend:
+https://satsang-portal.vercel.app/
+
+Backend API:
+https://satsang-portal-backend.onrender.com/api/health
+
 ---
 
 # Author
