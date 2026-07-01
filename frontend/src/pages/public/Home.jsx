@@ -69,7 +69,7 @@ const Home = () => {
           { label: 'Active Members', value: '30+' },
           { label: 'Yearly Sabhas', value: '52' },
           { label: 'Community Events', value: '45/yr' },
-          { label: 'Years of Seva', value: '25+' },
+          { label: 'Monthly Sabhas', value: '4' },
         ].map((stat, i) => (
           <div key={i} className="bg-surface-container-lowest p-6 rounded-card border border-surface-container shadow-sm text-center">
             <h3 className="text-headline-lg font-bold text-primary mb-2">{stat.value}</h3>
@@ -145,7 +145,7 @@ const Home = () => {
                     loading="lazy"
                     className="absolute inset-0 w-full h-full object-cover"
                   />
-                  
+
                   {/* YouTube Premium Play Button */}
                   {banner.mediaType === 'YOUTUBE' && (
                     <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
